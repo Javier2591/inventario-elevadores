@@ -29,9 +29,6 @@ class User extends Authenticatable
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Atributos que pueden asignarse mediante create() y update().
-     */
     protected $fillable = [
         'name',
         'email',
@@ -47,10 +44,6 @@ class User extends Authenticatable
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Información que no debe mostrarse al convertir
-     * el usuario en arreglo o JSON.
-     */
     protected $hidden = [
         'password',
         'remember_token',
@@ -62,9 +55,6 @@ class User extends Authenticatable
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Define las conversiones automáticas del modelo.
-     */
     protected function casts(): array
     {
         return [
@@ -85,10 +75,31 @@ class User extends Authenticatable
      */
     public function purchases(): HasMany
     {
-        return $this->hasMany(
-            Purchase::class,
-            'user_id'
-        );
+        return $this->hasMany(Purchase::class, 'user_id');
+    }
+
+    /**
+     * Ventas registradas por el usuario.
+     */
+    public function sales(): HasMany
+    {
+        return $this->hasMany(Sale::class, 'user_id');
+    }
+
+    /**
+     * Ventas canceladas por el usuario.
+     */
+    public function cancelledSales(): HasMany
+    {
+        return $this->hasMany(Sale::class, 'cancelled_by');
+    }
+
+    /**
+     * Clientes registrados por el usuario.
+     */
+    public function customersCreated(): HasMany
+    {
+        return $this->hasMany(Customer::class, 'created_by');
     }
 
     /**
@@ -104,10 +115,6 @@ class User extends Authenticatable
 
     /**
      * Órdenes asignadas al usuario cuando trabaja como técnico.
-     *
-     * Esta relación puede utilizarse mediante:
-     *
-     * $user->serviceOrders
      */
     public function serviceOrders(): HasMany
     {
@@ -118,14 +125,9 @@ class User extends Authenticatable
     }
 
     /**
-     * Alias descriptivo para las órdenes asignadas.
+     * Alias utilizado para contar las órdenes asignadas.
      *
-     * El componente de administración de usuarios utiliza:
-     *
-     * withCount('serviceOrdersAssigned')
-     *
-     * Laravel generará el atributo:
-     *
+     * Genera el atributo:
      * service_orders_assigned_count
      */
     public function serviceOrdersAssigned(): HasMany
@@ -172,9 +174,6 @@ class User extends Authenticatable
 
     /**
      * Determina si la cuenta está activa.
-     *
-     * La conversión explícita garantiza que siempre
-     * se devuelva un valor booleano.
      */
     public function isActive(): bool
     {
@@ -197,25 +196,14 @@ class User extends Authenticatable
 
     /**
      * Obtiene solamente usuarios activos.
-     *
-     * Ejemplo:
-     *
-     * User::active()->get();
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where(
-            'is_active',
-            true
-        );
+        return $query->where('is_active', true);
     }
 
     /**
-     * Obtiene solamente usuarios administradores.
-     *
-     * Ejemplo:
-     *
-     * User::admins()->get();
+     * Obtiene solamente administradores.
      */
     public function scopeAdmins(Builder $query): Builder
     {
@@ -226,11 +214,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Obtiene solamente usuarios técnicos.
-     *
-     * Ejemplo:
-     *
-     * User::technicians()->get();
+     * Obtiene solamente técnicos.
      */
     public function scopeTechnicians(Builder $query): Builder
     {
@@ -247,13 +231,7 @@ class User extends Authenticatable
     */
 
     /**
-     * Genera las iniciales del usuario para mostrarlas
-     * en el avatar de la aplicación.
-     *
-     * Ejemplos:
-     *
-     * "Mario Rodríguez" se convierte en "MR".
-     * "Javier" se convierte en "J".
+     * Genera las iniciales del usuario para su avatar.
      */
     public function initials(): string
     {
@@ -269,8 +247,7 @@ class User extends Authenticatable
         $words = array_values(
             array_filter(
                 $words,
-                fn (string $word): bool =>
-                    $word !== ''
+                fn (string $word): bool => $word !== ''
             )
         );
 
@@ -281,14 +258,9 @@ class User extends Authenticatable
         $initials = collect($words)
             ->take(2)
             ->map(
-                fn (string $word): string =>
-                    mb_strtoupper(
-                        mb_substr(
-                            $word,
-                            0,
-                            1
-                        )
-                    )
+                fn (string $word): string => mb_strtoupper(
+                    mb_substr($word, 0, 1)
+                )
             )
             ->implode('');
 

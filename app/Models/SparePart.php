@@ -15,6 +15,7 @@ class SparePart extends Model
     protected $fillable = [
         'category_id',
         'sku',
+        'barcode',
         'name',
         'description',
         'brand',
@@ -40,7 +41,7 @@ class SparePart extends Model
     }
 
     /**
-     * Categoría a la que pertenece la refacción.
+     * Categoría de la refacción.
      */
     public function category(): BelongsTo
     {
@@ -48,23 +49,27 @@ class SparePart extends Model
     }
 
     /**
-     * Entradas y salidas registradas en el Kárdex.
+     * Movimientos de inventario de la refacción.
      */
     public function inventoryMovements(): HasMany
     {
-        return $this->hasMany(
-            InventoryMovement::class
-        );
+        return $this->hasMany(InventoryMovement::class);
     }
 
     /**
-     * Compras donde aparece la refacción.
+     * Partidas de compras donde aparece la refacción.
      */
     public function purchaseItems(): HasMany
     {
-        return $this->hasMany(
-            PurchaseItem::class
-        );
+        return $this->hasMany(PurchaseItem::class);
+    }
+
+    /**
+     * Partidas de ventas donde aparece la refacción.
+     */
+    public function saleItems(): HasMany
+    {
+        return $this->hasMany(SaleItem::class);
     }
 
     /**
@@ -72,41 +77,29 @@ class SparePart extends Model
      */
     public function serviceOrderItems(): HasMany
     {
-        return $this->hasMany(
-            ServiceOrderItem::class
-        );
+        return $this->hasMany(ServiceOrderItem::class);
     }
 
     /**
-     * Consulta solamente las refacciones activas.
+     * Filtra únicamente refacciones activas.
      */
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where(
-            'is_active',
-            true
-        );
+        return $query->where('is_active', true);
     }
 
     /**
-     * Consulta refacciones con existencia baja.
-     *
-     * Una existencia se considera baja cuando es menor
-     * o igual al mínimo configurado.
+     * Filtra refacciones con existencia baja.
      */
     public function scopeLowStock(Builder $query): Builder
     {
         return $query
             ->where('minimum_stock', '>', 0)
-            ->whereColumn(
-                'stock',
-                '<=',
-                'minimum_stock'
-            );
+            ->whereColumn('stock', '<=', 'minimum_stock');
     }
 
     /**
-     * Busca una refacción por SKU, nombre, marca,
+     * Busca por código de barras, SKU, nombre, marca,
      * descripción o ubicación.
      */
     public function scopeSearch(
@@ -122,9 +115,10 @@ class SparePart extends Model
         $term = '%' . $search . '%';
 
         return $query->where(
-            function (Builder $query) use ($term) {
+            function (Builder $query) use ($term): void {
                 $query
-                    ->where('sku', 'like', $term)
+                    ->where('barcode', 'like', $term)
+                    ->orWhere('sku', 'like', $term)
                     ->orWhere('name', 'like', $term)
                     ->orWhere('brand', 'like', $term)
                     ->orWhere('description', 'like', $term)
@@ -134,7 +128,29 @@ class SparePart extends Model
     }
 
     /**
-     * Indica si la refacción tiene existencia baja.
+     * Localiza una refacción por código de barras o SKU.
+     */
+    public function scopeByIdentifier(
+        Builder $query,
+        string $identifier
+    ): Builder {
+        $identifier = trim($identifier);
+
+        if ($identifier === '') {
+            return $query;
+        }
+
+        return $query->where(
+            function (Builder $query) use ($identifier): void {
+                $query
+                    ->where('barcode', $identifier)
+                    ->orWhere('sku', $identifier);
+            }
+        );
+    }
+
+    /**
+     * Determina si la existencia está en el mínimo o debajo.
      */
     public function hasLowStock(): bool
     {
@@ -143,8 +159,7 @@ class SparePart extends Model
     }
 
     /**
-     * Indica si existe inventario suficiente
-     * para retirar una cantidad determinada.
+     * Comprueba si existe inventario suficiente.
      */
     public function hasEnoughStock(int $quantity): bool
     {
