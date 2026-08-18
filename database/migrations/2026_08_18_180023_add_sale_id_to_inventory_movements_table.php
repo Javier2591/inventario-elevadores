@@ -7,22 +7,49 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Relaciona los movimientos de inventario con una venta.
      */
     public function up(): void
     {
-        Schema::table('inventory_movements', function (Blueprint $table) {
-            //
-        });
+        /*
+         * La comprobación permite ejecutar la migración de manera
+         * segura tanto en MySQL como en SQLite durante las pruebas.
+         */
+        if (! Schema::hasColumn(
+            'inventory_movements',
+            'sale_id'
+        )) {
+            Schema::table(
+                'inventory_movements',
+                function (Blueprint $table): void {
+                    $table
+                        ->foreignId('sale_id')
+                        ->nullable()
+                        ->after('service_order_id')
+                        ->constrained('sales')
+                        ->restrictOnDelete();
+                }
+            );
+        }
     }
 
     /**
-     * Reverse the migrations.
+     * Elimina la relación al revertir la migración.
      */
     public function down(): void
     {
-        Schema::table('inventory_movements', function (Blueprint $table) {
-            //
-        });
+        if (Schema::hasColumn(
+            'inventory_movements',
+            'sale_id'
+        )) {
+            Schema::table(
+                'inventory_movements',
+                function (Blueprint $table): void {
+                    $table->dropConstrainedForeignId(
+                        'sale_id'
+                    );
+                }
+            );
+        }
     }
 };

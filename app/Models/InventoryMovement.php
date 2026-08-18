@@ -9,13 +9,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class InventoryMovement extends Model
 {
     public const TYPE_ENTRY = 'entry';
+
     public const TYPE_EXIT = 'exit';
 
+    /**
+     * Campos permitidos para asignación masiva.
+     *
+     * Es indispensable incluir sale_id para que create()
+     * conserve la relación con la venta.
+     */
     protected $fillable = [
         'spare_part_id',
         'user_id',
         'purchase_id',
         'service_order_id',
+        'sale_id',
         'type',
         'quantity',
         'previous_stock',
@@ -25,6 +33,9 @@ class InventoryMovement extends Model
         'notes',
     ];
 
+    /**
+     * Conversión automática de atributos.
+     */
     protected function casts(): array
     {
         return [
@@ -32,6 +43,7 @@ class InventoryMovement extends Model
             'user_id' => 'integer',
             'purchase_id' => 'integer',
             'service_order_id' => 'integer',
+            'sale_id' => 'integer',
             'quantity' => 'integer',
             'previous_stock' => 'integer',
             'new_stock' => 'integer',
@@ -39,7 +51,7 @@ class InventoryMovement extends Model
     }
 
     /**
-     * Refacción afectada.
+     * Refacción afectada por el movimiento.
      */
     public function sparePart(): BelongsTo
     {
@@ -47,7 +59,7 @@ class InventoryMovement extends Model
     }
 
     /**
-     * Usuario responsable.
+     * Usuario responsable del movimiento.
      */
     public function user(): BelongsTo
     {
@@ -63,7 +75,7 @@ class InventoryMovement extends Model
     }
 
     /**
-     * Orden que originó una salida.
+     * Orden de servicio que originó una salida.
      */
     public function serviceOrder(): BelongsTo
     {
@@ -71,7 +83,15 @@ class InventoryMovement extends Model
     }
 
     /**
-     * Consulta solamente entradas.
+     * Venta que originó el movimiento.
+     */
+    public function sale(): BelongsTo
+    {
+        return $this->belongsTo(Sale::class);
+    }
+
+    /**
+     * Filtra solamente entradas de inventario.
      */
     public function scopeEntries(Builder $query): Builder
     {
@@ -82,7 +102,7 @@ class InventoryMovement extends Model
     }
 
     /**
-     * Consulta solamente salidas.
+     * Filtra solamente salidas de inventario.
      */
     public function scopeExits(Builder $query): Builder
     {
@@ -92,11 +112,17 @@ class InventoryMovement extends Model
         );
     }
 
+    /**
+     * Determina si el movimiento es una entrada.
+     */
     public function isEntry(): bool
     {
         return $this->type === self::TYPE_ENTRY;
     }
 
+    /**
+     * Determina si el movimiento es una salida.
+     */
     public function isExit(): bool
     {
         return $this->type === self::TYPE_EXIT;
