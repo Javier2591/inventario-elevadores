@@ -8,7 +8,6 @@
     </head>
 
     <body class="min-h-screen bg-white antialiased dark:bg-zinc-800">
-
         @php
             /*
             |--------------------------------------------------------------------------
@@ -119,6 +118,7 @@
                         Menú exclusivo para administradores.
                     --}}
                     @if ($isAdmin)
+                        {{-- Categorías --}}
                         @if (\Illuminate\Support\Facades\Route::has('categories.index'))
                             <flux:navlist.item
                                 icon="tag"
@@ -130,6 +130,7 @@
                             </flux:navlist.item>
                         @endif
 
+                        {{-- Proveedores --}}
                         @if (\Illuminate\Support\Facades\Route::has('suppliers.index'))
                             <flux:navlist.item
                                 icon="truck"
@@ -141,6 +142,19 @@
                             </flux:navlist.item>
                         @endif
 
+                        {{-- Clientes --}}
+                        @if (\Illuminate\Support\Facades\Route::has('customers.index'))
+                            <flux:navlist.item
+                                icon="users"
+                                :href="route('customers.index')"
+                                :current="request()->routeIs('customers.*')"
+                                wire:navigate
+                            >
+                                Clientes
+                            </flux:navlist.item>
+                        @endif
+
+                        {{-- Elevadores --}}
                         @if (\Illuminate\Support\Facades\Route::has('elevators.index'))
                             <flux:navlist.item
                                 icon="building-office"
@@ -152,6 +166,7 @@
                             </flux:navlist.item>
                         @endif
 
+                        {{-- Órdenes de servicio --}}
                         @if (\Illuminate\Support\Facades\Route::has('service-orders.index'))
                             <flux:navlist.item
                                 icon="clipboard-document-check"
@@ -163,6 +178,7 @@
                             </flux:navlist.item>
                         @endif
 
+                        {{-- Refacciones --}}
                         @if (\Illuminate\Support\Facades\Route::has('spare-parts.index'))
                             <flux:navlist.item
                                 icon="wrench-screwdriver"
@@ -174,6 +190,7 @@
                             </flux:navlist.item>
                         @endif
 
+                        {{-- Compras --}}
                         @if (\Illuminate\Support\Facades\Route::has('purchases.index'))
                             <flux:navlist.item
                                 icon="shopping-cart"
@@ -185,6 +202,7 @@
                             </flux:navlist.item>
                         @endif
 
+                        {{-- Movimientos --}}
                         @if (\Illuminate\Support\Facades\Route::has('inventory-movements.index'))
                             <flux:navlist.item
                                 icon="arrows-right-left"
@@ -196,6 +214,7 @@
                             </flux:navlist.item>
                         @endif
 
+                        {{-- Usuarios y técnicos --}}
                         @if (\Illuminate\Support\Facades\Route::has('users.index'))
                             <flux:navlist.item
                                 icon="users"
@@ -221,7 +240,7 @@
                 <flux:navlist variant="outline">
                     <flux:navlist.item
                         icon="folder-git-2"
-                        href="https://github.com/laravel/livewire-starter-kit"
+                        href="https://github.com/Javier2591/inventario-elevadores"
                         target="_blank"
                     >
                         Repositorio
@@ -283,9 +302,7 @@
 
                     <flux:menu.separator />
 
-                    {{--
-                        Cierre de sesión protegido con token CSRF.
-                    --}}
+                    {{-- Cierre de sesión protegido mediante CSRF --}}
                     <form
                         method="POST"
                         action="{{ route('logout') }}"

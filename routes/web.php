@@ -20,8 +20,8 @@ Route::redirect('/', '/dashboard')
 | Rutas para cualquier usuario autenticado y activo
 |--------------------------------------------------------------------------
 |
-| Aquí se encuentran las rutas compartidas por administradores
-| y técnicos. El middleware "active" bloquea cuentas desactivadas.
+| Estas rutas son compartidas por administradores y técnicos.
+| El middleware active bloquea las cuentas desactivadas.
 |
 */
 
@@ -32,9 +32,8 @@ Route::middleware([
     /*
      * Distribuidor de Dashboard.
      *
-     * Después del inicio de sesión, Laravel puede enviar al usuario
-     * a /dashboard. Esta ruta revisa su función y lo dirige a la
-     * pantalla correspondiente.
+     * Después del inicio de sesión, Laravel envía al usuario a
+     * la pantalla correspondiente según su función.
      */
     Route::get('/dashboard', function () {
         $user = request()->user();
@@ -62,8 +61,8 @@ Route::middleware([
     /*
      * Dashboard del técnico.
      *
-     * El componente también comprueba internamente que el usuario
-     * sea técnico y que su cuenta permanezca activa.
+     * El componente también verifica que el usuario sea técnico
+     * y que su cuenta continúe activa.
      */
     Route::livewire(
         '/technician-dashboard',
@@ -73,8 +72,7 @@ Route::middleware([
     /*
      * Órdenes asignadas al técnico autenticado.
      *
-     * El componente filtra todas las consultas utilizando
-     * technician_id = ID del usuario conectado.
+     * El componente filtra las órdenes mediante technician_id.
      */
     Route::livewire(
         '/my-service-orders',
@@ -93,8 +91,8 @@ Route::middleware([
 | - Cuenta activa.
 | - Función de administrador.
 |
-| Ocultar enlaces en el sidebar mejora la interfaz, pero este
-| middleware es la protección real frente al acceso por URL.
+| El middleware admin es la protección real. Ocultar enlaces en el
+| menú solamente mejora la interfaz, pero no sustituye la seguridad.
 |
 */
 
@@ -120,12 +118,20 @@ Route::middleware([
     )->name('categories.index');
 
     /*
-     * Proveedores.
+     * Proveedores del inventario.
      */
     Route::livewire(
         '/suppliers',
         'suppliers.index'
     )->name('suppliers.index');
+
+    /*
+     * Clientes utilizados en las ventas de refacciones.
+     */
+    Route::livewire(
+        '/customers',
+        'customers.index'
+    )->name('customers.index');
 
     /*
      * Elevadores registrados.
@@ -144,7 +150,7 @@ Route::middleware([
     )->name('service-orders.index');
 
     /*
-     * Refacciones del inventario.
+     * Refacciones disponibles en el inventario.
      */
     Route::livewire(
         '/spare-parts',
@@ -152,7 +158,7 @@ Route::middleware([
     )->name('spare-parts.index');
 
     /*
-     * Compras a proveedores.
+     * Compras realizadas a proveedores.
      */
     Route::livewire(
         '/purchases',
@@ -182,7 +188,7 @@ Route::middleware([
 |--------------------------------------------------------------------------
 |
 | Incluye perfil, contraseña y apariencia. Estas rutas pertenecen al
-| Starter Kit de Laravel y son utilizadas por las pruebas de Settings.
+| Starter Kit y son utilizadas por las pruebas de configuración.
 |
 */
 
