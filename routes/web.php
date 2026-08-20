@@ -1,14 +1,16 @@
 <?php
 
+use App\Http\Controllers\SaleReceiptController;
 use Illuminate\Support\Facades\Route;
+
 
 /*
 |--------------------------------------------------------------------------
 | Página inicial
 |--------------------------------------------------------------------------
 |
-| Todos los usuarios son enviados a /dashboard.
-| Si no han iniciado sesión, el middleware auth los enviará al login.
+| La raíz del sistema redirige al distribuidor principal.
+| Si no existe una sesión, el middleware auth enviará al login.
 |
 */
 
@@ -17,11 +19,12 @@ Route::redirect('/', '/dashboard')
 
 /*
 |--------------------------------------------------------------------------
-| Rutas para cualquier usuario autenticado y activo
+| Rutas para usuarios autenticados y activos
 |--------------------------------------------------------------------------
 |
-| Estas rutas son compartidas por administradores y técnicos.
-| El middleware active bloquea las cuentas desactivadas.
+| Estas rutas pueden ser solicitadas por administradores y técnicos.
+| Los componentes de técnico también validan internamente la función
+| del usuario conectado.
 |
 */
 
@@ -30,10 +33,10 @@ Route::middleware([
     'active',
 ])->group(function (): void {
     /*
-     * Distribuidor de Dashboard.
+     * Distribuidor principal del Dashboard.
      *
-     * Después del inicio de sesión, Laravel envía al usuario a
-     * la pantalla correspondiente según su función.
+     * Envía a cada usuario a la pantalla correspondiente según
+     * su función dentro del sistema.
      */
     Route::get('/dashboard', function () {
         $user = request()->user();
@@ -59,10 +62,7 @@ Route::middleware([
     })->name('dashboard');
 
     /*
-     * Dashboard del técnico.
-     *
-     * El componente también verifica que el usuario sea técnico
-     * y que su cuenta continúe activa.
+     * Dashboard exclusivo del técnico.
      */
     Route::livewire(
         '/technician-dashboard',
@@ -70,9 +70,7 @@ Route::middleware([
     )->name('technician.dashboard');
 
     /*
-     * Órdenes asignadas al técnico autenticado.
-     *
-     * El componente filtra las órdenes mediante technician_id.
+     * Órdenes asignadas al técnico conectado.
      */
     Route::livewire(
         '/my-service-orders',
@@ -85,14 +83,14 @@ Route::middleware([
 | Rutas administrativas
 |--------------------------------------------------------------------------
 |
-| Todas estas rutas requieren:
+| Requieren:
 |
 | - Sesión iniciada.
-| - Cuenta activa.
+| - Usuario activo.
 | - Función de administrador.
 |
-| El middleware admin es la protección real. Ocultar enlaces en el
-| menú solamente mejora la interfaz, pero no sustituye la seguridad.
+| El middleware es la protección real. Ocultar los enlaces en el
+| sidebar solamente mejora la interfaz, pero no sustituye la seguridad.
 |
 */
 
@@ -102,7 +100,7 @@ Route::middleware([
     'admin',
 ])->group(function (): void {
     /*
-     * Dashboard administrativo del inventario.
+     * Dashboard administrativo.
      */
     Route::livewire(
         '/admin-dashboard',
@@ -118,7 +116,7 @@ Route::middleware([
     )->name('categories.index');
 
     /*
-     * Proveedores del inventario.
+     * Proveedores.
      */
     Route::livewire(
         '/suppliers',
@@ -126,13 +124,29 @@ Route::middleware([
     )->name('suppliers.index');
 
     /*
-     * Clientes utilizados en las ventas de refacciones.
+     * Clientes.
      */
     Route::livewire(
         '/customers',
         'customers.index'
     )->name('customers.index');
 
+    /*
+     * Ventas de refacciones.
+     */
+    Route::livewire(
+        '/sales',
+        'sales.index'
+    )->name('sales.index');
+    /*
+ * Comprobante imprimible de una venta.
+ */
+    Route::get(
+    '/sales/{sale}/receipt',
+    SaleReceiptController::class
+    )
+    ->whereNumber('sale')
+    ->name('sales.receipt');
     /*
      * Elevadores registrados.
      */
@@ -142,7 +156,7 @@ Route::middleware([
     )->name('elevators.index');
 
     /*
-     * Órdenes de servicio administradas.
+     * Órdenes de servicio.
      */
     Route::livewire(
         '/service-orders',
@@ -150,7 +164,7 @@ Route::middleware([
     )->name('service-orders.index');
 
     /*
-     * Refacciones disponibles en el inventario.
+     * Refacciones disponibles.
      */
     Route::livewire(
         '/spare-parts',
@@ -184,11 +198,11 @@ Route::middleware([
 
 /*
 |--------------------------------------------------------------------------
-| Rutas de configuración de la cuenta
+| Configuración de la cuenta
 |--------------------------------------------------------------------------
 |
-| Incluye perfil, contraseña y apariencia. Estas rutas pertenecen al
-| Starter Kit y son utilizadas por las pruebas de configuración.
+| Incluye perfil, contraseña, apariencia y seguridad. Estas rutas
+| pertenecen al Starter Kit y también son utilizadas por las pruebas.
 |
 */
 
