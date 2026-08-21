@@ -232,7 +232,10 @@ class extends Component
 
 ?>
 
-<div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl">
+<div
+    wire:poll.5s.visible
+    class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl"
+>
 
     {{-- Encabezado principal --}}
     <section class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">

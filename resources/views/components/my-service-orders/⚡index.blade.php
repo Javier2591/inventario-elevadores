@@ -546,7 +546,10 @@ new class extends Component
 
 ?>
 
-<div class="mx-auto w-full max-w-7xl space-y-6 p-4 sm:p-6">
+<div
+    wire:poll.5s.visible
+    class="mx-auto w-full max-w-7xl space-y-6 p-4 sm:p-6"
+>
     {{-- Encabezado --}}
     <div>
         <h1 class="text-2xl font-bold text-zinc-900 dark:text-white">

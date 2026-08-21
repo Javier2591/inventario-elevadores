@@ -1338,7 +1338,10 @@ new class extends Component
     </form>
 
     {{-- Historial de órdenes --}}
-    <section class="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
+    <section
+        wire:poll.5s.visible
+        class="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900"
+    >
         <div class="border-b border-zinc-200 p-5 dark:border-zinc-700">
             <h2 class="text-lg font-semibold text-zinc-900 dark:text-white">
                 Historial de órdenes
